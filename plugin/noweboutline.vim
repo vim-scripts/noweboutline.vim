@@ -40,15 +40,29 @@ exec "silent keepjumps ".(has("gui") ? "drop" : "hide edit" )." ".s:chunkBufName
 setlocal buftype=nofile
 setlocal modifiable
 setlocal noswapfile
-setlocal nowrap
+setlocal wrap
+setlocal fdm=indent
 let b:nwCodeChunkList = s:nwCodeChunkList
 let b:nwSectionList = s:nwSectionList
 let b:currentList = s:nwOutlineList
 "call setline(0,s:nwSectionList)
 "TASK: insert code chunks to specific buffer
 let i = 0
+let indent = '' 
 for chunk in b:currentList
-	call setline(i,get(chunk,'text'))
+	let title = get(chunk,'text')
+	if 0 == match(title,'\\\(sub\)*section')
+		let indent = ''
+		let indentCount = (match(title,'section')-1)/3
+		while indentCount > 0
+			let indent = indent.'	'
+			let indentCount = indentCount - 1
+		endwhile
+		let currentIndent = indent
+	else
+		let currentIndent = indent.'	'
+	endif
+	call setline(i,currentIndent.title)
 	let i = i + 1
 endfor
 nnoremap <buffer> <silent> <cr> :call <SID>selectChunk()<cr>

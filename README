@@ -1,0 +1,6 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=3720
+
+Literate programming tool for *.nw file
+change log:
+ver. 0.1:
+open an outline window, show code chunk list, press enter to jump to corresonding code chunk

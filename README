@@ -4,3 +4,5 @@ Literate programming tool for *.nw file
 change log:
 ver. 0.1:
 open an outline window, show code chunk list, press enter to jump to corresonding code chunk
+ver. 0.13
+map <C-F1> to open document outline window

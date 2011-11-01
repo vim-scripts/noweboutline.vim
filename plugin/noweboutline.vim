@@ -9,14 +9,39 @@ function! s:selectChunk(...)
 	execute cmd
 	call cursor(lineNumber,0)
 endfunction
-function! s:showOutlineWindow(...)
-	if !exists("s:chunkBufName")
-		let s:chunkBufName = 'nwChunkBuf'
-		while bufexists(s:chunkBufName)
-			let s:chunkBufName = '_'.s:chunkBufName.'_'
-		endwhile
+
+fu! s:getNowebAutoCompPrefix(str)
+	return substitute(matchstr(a:str, '\(<<\)\@<=.*'), '<<.*', '', '')
+endfu
+
+fu! s:popupNowebAutoComp()
+	call s:buildChunkList()
+	let line = getline(".")
+	let prefix = s:getNowebAutoCompPrefix(strpart(line, 0, col(".")))
+
+	if prefix == ""
+		return ''
 	endif
-	let s:chunkBufNum = bufnr(s:chunkBufName,1)
+
+	echom "prefix is \"".prefix."\""
+	let popupList = []
+	for codeChunk in b:nwCodeChunkList
+		let title = matchstr(get(codeChunk,'text'), '\(<<\)\@<=.*\(>>=\)\@=')
+		if stridx(title, prefix, 0) == 0
+			call add(popupList, title)
+		endif
+	endfor
+	if len(popupList) > 0
+		call complete(col('.'), popupList)
+	endif
+	return ''
+endfu
+
+fu! TestFunc()
+	call s:popupNowebAutoComp()
+endfu
+
+fu! s:buildChunkList()
 	"TASK: outline current buffer
 	let s:tmp = getloclist(0)
 	"TASK: get code chunks via a location list
@@ -34,6 +59,17 @@ function! s:showOutlineWindow(...)
 	"TASK: clear location list in current buffer
 	call setloclist(0,s:tmp)
 	unlet s:tmp
+endfu
+
+function! s:showOutlineWindow(...)
+	if !exists("s:chunkBufName")
+		let s:chunkBufName = 'nwChunkBuf'
+		while bufexists(s:chunkBufName)
+			let s:chunkBufName = '_'.s:chunkBufName.'_'
+		endwhile
+	endif
+	let s:chunkBufNum = bufnr(s:chunkBufName,1)
+	buildChunkList()
 	"TASK: create a new window with specific name.
 	vsplit
 	"TASK: switch to outline buffer
@@ -69,3 +105,5 @@ function! s:showOutlineWindow(...)
 	nnoremap <buffer> <silent> <cr> :call <SID>selectChunk()<cr>
 endfunction
 nnoremap <buffer> <silent> <C-F1> :call <SID>showOutlineWindow()<cr>
+nnoremap <buffer> <silent> <C-n> :call <SID>showOutlineWindow()<cr>
+inoremap <buffer> <silent> <C-n> <C-R>=<SID>popupNowebAutoComp()<cr>

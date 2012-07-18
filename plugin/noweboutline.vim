@@ -23,7 +23,6 @@ fu! s:popupNowebAutoComp()
 		return ''
 	endif
 
-	echom "prefix is \"".prefix."\""
 	let popupList = []
 	for codeChunk in b:nwCodeChunkList
 		let title = matchstr(get(codeChunk,'text'), '\(<<\)\@<=.*\(>>=\)\@=')
@@ -32,7 +31,7 @@ fu! s:popupNowebAutoComp()
 		endif
 	endfor
 	if len(popupList) > 0
-		call complete(col('.'), popupList)
+		call complete(col('.') - len(prefix), popupList)
 	endif
 	return ''
 endfu
@@ -69,7 +68,7 @@ function! s:showOutlineWindow(...)
 		endwhile
 	endif
 	let s:chunkBufNum = bufnr(s:chunkBufName,1)
-	buildChunkList()
+	call s:buildChunkList()
 	"TASK: create a new window with specific name.
 	vsplit
 	"TASK: switch to outline buffer
